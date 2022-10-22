@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { CoinController } from './coin.controller';
 import { CoinService } from './coin.service';
 import {
@@ -11,7 +12,7 @@ import { Coin } from './coin.entity';
 import { DataSource } from 'typeorm';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Coin])],
+  imports: [HttpModule, TypeOrmModule.forFeature([Coin])],
   controllers: [CoinController],
   providers: [
     {

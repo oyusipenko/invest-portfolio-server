@@ -25,21 +25,32 @@ export interface CoinRepository extends Repository<Coin> {
   getAllCoins(): Promise<Coin[]>;
 
   addCoin: any;
+  deleteCoin: any;
 }
 
 export const customCoinRepositoryMethods: Pick<
   CoinRepository,
-  'getAllCoins' | 'addCoin'
+  'getAllCoins' | 'addCoin' | 'deleteCoin'
 > = {
-  getAllCoins(this: Repository<Coin>) {
-    return this.find();
+  async getAllCoins(this: Repository<Coin>) {
+    const allCoins = await this.find();
+
+    return allCoins;
   },
   async addCoin(this: Repository<Coin>, addCoinDto: AddCoinDto) {
-    const { coinName, quantity, price } = addCoinDto;
+    const { coinName, quantity, priceAverage } = addCoinDto;
 
-    const coin = this.create({ coinName, quantity, price });
-    console.log('coin', coin);
+    const coin = this.create({
+      coinName: coinName.toUpperCase(),
+      quantity,
+      priceAverage,
+    });
+
     await this.save(coin);
     return coin;
+  },
+
+  async deleteCoin(this: Repository<Coin>, id: string) {
+    await this.delete(id);
   },
 };

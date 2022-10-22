@@ -4,5 +4,5 @@ export class AddCoinDto {
   @IsNotEmpty()
   coinName: string;
   quantity: string;
-  price: string;
+  priceAverage: string;
 }

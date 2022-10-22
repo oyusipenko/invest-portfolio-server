@@ -12,5 +12,5 @@ export class Coin {
   quantity: string;
 
   @Column()
-  price: string;
+  priceAverage: string;
 }
