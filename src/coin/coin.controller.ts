@@ -11,8 +11,8 @@ export class CoinController {
   constructor(private coinsService: CoinService) {}
 
   @Get()
-  getAllCoins(): Promise<any[]> {
-    return this.coinsService.getAllCoins();
+  getAllUserCoins(): Promise<unknown[]> {
+    return this.coinsService.getAllUserCoins();
   }
 
   @Post()
@@ -21,7 +21,7 @@ export class CoinController {
   }
 
   @Get('/portfolio_status')
-  getPortfolioStatus(): Promise<IPortfolioStatus> {
+  getPortfolioStatus(): Promise<unknown> {
     return this.coinsService.getPortfolioStatus();
   }
 

@@ -5,10 +5,6 @@ import { AddCoinDto } from './dto/add-coin.dto';
 import { CoinRepository } from './coin.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IPortfolioStatus } from './coin.model';
-import { map, catchError, Observable } from 'rxjs';
-import axios from '@nestjs/axios';
-
-class AxiosResponse<T> {}
 
 @Injectable()
 export class CoinService {
@@ -18,8 +14,8 @@ export class CoinService {
     private readonly httpService: HttpService,
   ) {}
 
-  async getAllCoins(): Promise<Coin[]> {
-    return this.coinRepository.getAllCoins();
+  async getAllUserCoins(): Promise<Coin[]> {
+    return this.coinRepository.getAllUserCoins();
   }
 
   async addCoin(addCoinDto: AddCoinDto): Promise<Coin> {
@@ -31,9 +27,6 @@ export class CoinService {
   }
 
   async getCoinPrice(coinSymbol: string): Promise<any> {
-    console.log(
-      `https://www.binance.com/api/v3/ticker/price?symbol=${coinSymbol}BUSD`,
-    );
     const { data } = await this.httpService
       .get(
         `https://www.binance.com/api/v3/ticker/price?symbol=${coinSymbol}BUSD`,
@@ -42,31 +35,64 @@ export class CoinService {
     return data;
   }
 
-  async getPortfolioStatus(): Promise<IPortfolioStatus> {
-    const coins = await this.getAllCoins();
-    console.log('coins', coins);
-    // const response = coins.map((coin) => coin.coinName);
-    const response = await Promise.all(
-      coins.map((coin) => this.getCoinPrice(coin.coinName)),
-    ).then((res) =>
-      res.map((coinPrice) => {
-        const coinName = coinPrice.symbol.substring(
-          0,
-          coinPrice.symbol.indexOf('BUSD'),
-        );
-        return {
-          [coinName]: coinPrice.price,
-        };
-      }),
-    );
-    console.log('response', response);
+  async getPortfolioStatus(): Promise<unknown> {
+    const allUserCoins = await this.getAllUserCoins();
 
-    const PortfolioStatus = {
-      startCost: '100$',
-      currentCost: '50%',
-      profitUsd: '-50$',
-      profitPercentage: '-50%',
+    const coinsCurrentPrice = await Promise.all(
+      allUserCoins.map((coin) => this.getCoinPrice(coin.coinName)),
+    ).then((res) =>
+      res.reduce((acc, coin) => {
+        const coinName = coin.symbol.substring(0, coin.symbol.indexOf('BUSD'));
+        const coinPrice = coin.price;
+        return { ...acc, [coinName]: coinPrice };
+      }, {}),
+    );
+
+    const statusPerCoin = allUserCoins.reduce((acc, coin) => {
+      const coinStatus = {
+        quantity: coin.quantity,
+        coinName: coin.coinName,
+        priceAverage: Number(coin.priceAverage).toFixed(2),
+        startCost: (+coin.quantity * +coin.priceAverage).toFixed(2),
+        currentPrice: Number(coinsCurrentPrice[coin.coinName]).toFixed(2),
+        currentCost: (
+          +coin.quantity * +coinsCurrentPrice[coin.coinName]
+        ).toFixed(2),
+        profitDollar: (
+          +coin.quantity * +coinsCurrentPrice[coin.coinName] -
+          +coin.quantity * +coin.priceAverage
+        ).toFixed(2),
+        profitPercent: (
+          ((+coin.quantity * +coinsCurrentPrice[coin.coinName] -
+            +coin.quantity * +coin.priceAverage) /
+            (+coin.quantity * +coin.priceAverage)) *
+          100
+        ).toFixed(0),
+      };
+      const test = [...acc, coinStatus];
+      return test;
+    }, []);
+
+    const statusAllCoins = statusPerCoin.reduce(
+      (acc, coin) => {
+        const startCost: number = +acc.startCost + +coin.startCost;
+        const currentCost: number = +acc.currentCost + +coin.currentCost;
+        const profitUsd: number = +(currentCost - startCost).toFixed(2);
+        const profitPercentage: number = +(
+          (profitUsd / startCost) *
+          100
+        ).toFixed(2);
+        return { ...acc, startCost, currentCost, profitUsd, profitPercentage };
+      },
+      { startCost: 0, currentCost: 0, profitUsd: 0, profitPercentage: 0 },
+    );
+
+    const portfolioStatus = {
+      perCoin: [...statusPerCoin],
+      allCoins: {
+        ...statusAllCoins,
+      },
     };
-    return PortfolioStatus;
+    return portfolioStatus;
   }
 }

@@ -22,7 +22,7 @@ export class CoinRepository extends Repository<Coin> {
 export interface CoinRepository extends Repository<Coin> {
   this: Repository<Coin>;
 
-  getAllCoins(): Promise<Coin[]>;
+  getAllUserCoins(): Promise<Coin[]>;
 
   addCoin: any;
   deleteCoin: any;
@@ -30,12 +30,12 @@ export interface CoinRepository extends Repository<Coin> {
 
 export const customCoinRepositoryMethods: Pick<
   CoinRepository,
-  'getAllCoins' | 'addCoin' | 'deleteCoin'
+  'getAllUserCoins' | 'addCoin' | 'deleteCoin'
 > = {
-  async getAllCoins(this: Repository<Coin>) {
-    const allCoins = await this.find();
+  async getAllUserCoins(this: Repository<Coin>) {
+    const allUserCoins = await this.find();
 
-    return allCoins;
+    return allUserCoins;
   },
   async addCoin(this: Repository<Coin>, addCoinDto: AddCoinDto) {
     const { coinName, quantity, priceAverage } = addCoinDto;
