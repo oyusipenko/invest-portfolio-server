@@ -1,10 +1,16 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { InjectRepository } from '@nestjs/typeorm';
+
 import { Coin } from './coin.entity';
 import { AddCoinDto } from './dto/add-coin.dto';
 import { CoinRepository } from './coin.repository';
-import { InjectRepository } from '@nestjs/typeorm';
-import { IPortfolioStatus } from './coin.model';
+import {
+  IAllCoinsStatus,
+  ICoin,
+  IPerCoinStatus,
+  IResponseGetPortfolioStatus,
+} from './coin.model';
 
 @Injectable()
 export class CoinService {
@@ -14,7 +20,7 @@ export class CoinService {
     private readonly httpService: HttpService,
   ) {}
 
-  async getAllUserCoins(): Promise<Coin[]> {
+  async getAllUserCoins(): Promise<ICoin[]> {
     return this.coinRepository.getAllUserCoins();
   }
 
@@ -35,7 +41,7 @@ export class CoinService {
     return data;
   }
 
-  async getPortfolioStatus(): Promise<unknown> {
+  async getPortfolioStatus(): Promise<IResponseGetPortfolioStatus> {
     const allUserCoins = await this.getAllUserCoins();
 
     const coinsCurrentPrice = await Promise.all(
@@ -48,46 +54,42 @@ export class CoinService {
       }, {}),
     );
 
-    const statusPerCoin = allUserCoins.reduce((acc, coin) => {
-      const coinStatus = {
-        quantity: coin.quantity,
-        coinName: coin.coinName,
-        priceAverage: Number(coin.priceAverage).toFixed(2),
-        startCost: (+coin.quantity * +coin.priceAverage).toFixed(2),
-        currentPrice: Number(coinsCurrentPrice[coin.coinName]).toFixed(2),
-        currentCost: (
-          +coin.quantity * +coinsCurrentPrice[coin.coinName]
-        ).toFixed(2),
-        profitDollar: (
-          +coin.quantity * +coinsCurrentPrice[coin.coinName] -
-          +coin.quantity * +coin.priceAverage
-        ).toFixed(2),
-        profitPercent: (
-          ((+coin.quantity * +coinsCurrentPrice[coin.coinName] -
-            +coin.quantity * +coin.priceAverage) /
-            (+coin.quantity * +coin.priceAverage)) *
-          100
-        ).toFixed(0),
-      };
-      const test = [...acc, coinStatus];
-      return test;
-    }, []);
-
-    const statusAllCoins = statusPerCoin.reduce(
-      (acc, coin) => {
-        const startCost: number = +acc.startCost + +coin.startCost;
-        const currentCost: number = +acc.currentCost + +coin.currentCost;
-        const profitUsd: number = +(currentCost - startCost).toFixed(2);
-        const profitPercentage: number = +(
-          (profitUsd / startCost) *
-          100
-        ).toFixed(2);
-        return { ...acc, startCost, currentCost, profitUsd, profitPercentage };
+    const statusPerCoin: IPerCoinStatus[] = allUserCoins.reduce(
+      (acc: IPerCoinStatus[], coin: ICoin) => {
+        const coinStatus = {
+          quantity: +coin.quantity,
+          coinName: coin.coinName,
+          priceStartAverage: +coin.priceAverage,
+          costStart: +coin.quantity * +coin.priceAverage,
+          priceCurrent: +coinsCurrentPrice[coin.coinName],
+          costCurrent: +coin.quantity * +coinsCurrentPrice[coin.coinName],
+          profitDollar:
+            +coin.quantity * +coinsCurrentPrice[coin.coinName] -
+            +coin.quantity * +coin.priceAverage,
+          profitPercent:
+            ((+coin.quantity * +coinsCurrentPrice[coin.coinName] -
+              +coin.quantity * +coin.priceAverage) /
+              (+coin.quantity * +coin.priceAverage)) *
+            100,
+        };
+        const test = [...acc, coinStatus];
+        return test;
       },
-      { startCost: 0, currentCost: 0, profitUsd: 0, profitPercentage: 0 },
+      [],
     );
 
-    const portfolioStatus = {
+    const statusAllCoins: IAllCoinsStatus = statusPerCoin.reduce(
+      (acc, coin) => {
+        const costStart: number = +acc.costStart + +coin.costStart;
+        const costCurrent: number = +acc.costCurrent + +coin.costCurrent;
+        const profitUsd: number = costCurrent - costStart;
+        const profitPercentage: number = (profitUsd / costStart) * 100;
+        return { ...acc, costStart, costCurrent, profitUsd, profitPercentage };
+      },
+      { costStart: 0, costCurrent: 0, profitUsd: 0, profitPercentage: 0 },
+    );
+
+    const portfolioStatus: IResponseGetPortfolioStatus = {
       perCoin: [...statusPerCoin],
       allCoins: {
         ...statusAllCoins,

@@ -4,14 +4,14 @@ import { CoinService } from './coin.service';
 import { AddCoinDto } from './dto/add-coin.dto';
 
 import { Coin } from './coin.entity';
-import { IPortfolioStatus } from './coin.model';
+import { ICoin, IResponseGetPortfolioStatus } from './coin.model';
 
 @Controller('coins')
 export class CoinController {
   constructor(private coinsService: CoinService) {}
 
   @Get()
-  getAllUserCoins(): Promise<unknown[]> {
+  getAllUserCoins(): Promise<ICoin[]> {
     return this.coinsService.getAllUserCoins();
   }
 
@@ -21,12 +21,12 @@ export class CoinController {
   }
 
   @Get('/portfolio_status')
-  getPortfolioStatus(): Promise<unknown> {
+  getPortfolioStatus(): Promise<IResponseGetPortfolioStatus> {
     return this.coinsService.getPortfolioStatus();
   }
 
   @Delete()
-  deleteCoin(@Body() id: Coin['id']): Promise<any> {
+  deleteCoin(@Body() id: Coin['id']): Promise<unknown> {
     return this.coinsService.deleteCoin(id);
   }
 }
