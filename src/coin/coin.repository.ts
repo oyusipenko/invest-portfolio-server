@@ -40,7 +40,7 @@ export const customCoinRepositoryMethods: Pick<
   async addCoin(this: Repository<Coin>, addCoinDto: AddCoinDto) {
     const { coinName, quantity, priceAverage } = addCoinDto;
 
-    const coin = this.create({
+    const coin = await this.create({
       coinName: coinName.toUpperCase(),
       quantity,
       priceAverage,

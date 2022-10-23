@@ -21,15 +21,15 @@ export class CoinService {
   ) {}
 
   async getAllUserCoins(): Promise<ICoin[]> {
-    return this.coinRepository.getAllUserCoins();
+    return await this.coinRepository.getAllUserCoins();
   }
 
   async addCoin(addCoinDto: AddCoinDto): Promise<Coin> {
-    return this.coinRepository.addCoin(addCoinDto);
+    return await this.coinRepository.addCoin(addCoinDto);
   }
 
   async deleteCoin(id: Coin['id']): Promise<Coin> {
-    return this.coinRepository.deleteCoin(id);
+    return await this.coinRepository.deleteCoin(id);
   }
 
   async getCoinPrice(coinSymbol: string): Promise<any> {
