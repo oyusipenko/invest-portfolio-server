@@ -72,8 +72,8 @@ export class CoinService {
               (+coin.quantity * +coin.price)) *
             100,
         };
-        const test = [...acc, coinStatus];
-        return test;
+        const arr = [...acc, coinStatus];
+        return arr;
       },
       [],
     );
@@ -102,7 +102,7 @@ export class CoinService {
     const allUserCoins = await this.getAllUserCoins();
     const selectedCoin = allUserCoins.find((coin) => coin.id === coinDto.id);
 
-    const updateCoinData = {
+    const updatedCoinData = {
       id: coinDto.id,
       quantity: (+selectedCoin.quantity + +coinDto.quantity).toString(),
       price: (
@@ -111,6 +111,22 @@ export class CoinService {
       ).toString(),
     };
 
-    await this.coinRepository.updateCoin(updateCoinData);
+    await this.coinRepository.updateCoin(updatedCoinData);
+  }
+
+  async sellCoins(data: Pick<ICoin, 'id' | 'quantity'>): Promise<void> {
+    const allUserCoins = await this.getAllUserCoins();
+    const selectedCoin = allUserCoins.find((coin) => coin.id === data.id);
+
+    const updatedCoinData = {
+      id: data.id,
+      quantity: (+selectedCoin.quantity - +data.quantity).toString(),
+    };
+
+    await this.coinRepository.updateCoin(updatedCoinData);
+  }
+
+  async editCoins(data: Partial<ICoin>): Promise<void> {
+    await this.coinRepository.updateCoin(data);
   }
 }

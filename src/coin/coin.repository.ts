@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
 import { Coin } from './coin.entity';
-import { AddCoinDto, CoinDto } from './dto/add-coin.dto';
+import { AddCoinDto } from './dto/add-coin.dto';
+import { ICoin } from './coin.model';
 
 export interface CoinRepository extends Repository<Coin> {
   this: Repository<Coin>;
@@ -38,11 +39,11 @@ export const customCoinRepositoryMethods: Pick<
     await this.delete(id);
   },
 
-  async updateCoin(this: Repository<Coin>, coinDto: CoinDto) {
+  async updateCoin(this: Repository<Coin>, coin: Partial<ICoin>) {
     await this.createQueryBuilder()
-      .update(coinDto)
-      .set(coinDto)
-      .where('id = :id', { id: coinDto.id })
+      .update(coin)
+      .set(coin)
+      .where('id = :id', { id: coin.id })
       .execute();
   },
 };
