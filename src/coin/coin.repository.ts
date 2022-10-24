@@ -1,23 +1,6 @@
 import { Repository } from 'typeorm';
 import { Coin } from './coin.entity';
-import { AddCoinDto } from './dto/add-coin.dto';
-/*
-
-export class CoinRepository extends Repository<Coin> {
-  async getAllCoins(): Promise<Coin[]> {
-    return this.query(`SELECT * FROM COIN`);
-  }
-
-  async addCoin(addCoinDto: AddCoinDto): Promise<Coin> {
-    const { coinName, quantity, price } = addCoinDto;
-
-    const coin = this.create({ coinName, quantity, price });
-
-    await this.save(coin);
-    return coin;
-  }
-}
-*/
+import { AddCoinDto, CoinDto } from './dto/add-coin.dto';
 
 export interface CoinRepository extends Repository<Coin> {
   this: Repository<Coin>;
@@ -26,11 +9,12 @@ export interface CoinRepository extends Repository<Coin> {
 
   addCoin: any;
   deleteCoin: any;
+  updateCoin: any;
 }
 
 export const customCoinRepositoryMethods: Pick<
   CoinRepository,
-  'getAllUserCoins' | 'addCoin' | 'deleteCoin'
+  'getAllUserCoins' | 'addCoin' | 'deleteCoin' | 'updateCoin'
 > = {
   async getAllUserCoins(this: Repository<Coin>) {
     const allUserCoins = await this.find();
@@ -38,12 +22,12 @@ export const customCoinRepositoryMethods: Pick<
     return allUserCoins;
   },
   async addCoin(this: Repository<Coin>, addCoinDto: AddCoinDto) {
-    const { coinName, quantity, priceAverage } = addCoinDto;
+    const { coinName, quantity, price } = addCoinDto;
 
     const coin = await this.create({
       coinName: coinName.toUpperCase(),
       quantity,
-      priceAverage,
+      price,
     });
 
     await this.save(coin);
@@ -52,5 +36,13 @@ export const customCoinRepositoryMethods: Pick<
 
   async deleteCoin(this: Repository<Coin>, id: string) {
     await this.delete(id);
+  },
+
+  async updateCoin(this: Repository<Coin>, coinDto: CoinDto) {
+    await this.createQueryBuilder()
+      .update(coinDto)
+      .set(coinDto)
+      .where('id = :id', { id: coinDto.id })
+      .execute();
   },
 };

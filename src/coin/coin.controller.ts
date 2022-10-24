@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
 
 import { CoinService } from './coin.service';
-import { AddCoinDto } from './dto/add-coin.dto';
+import { AddCoinDto, CoinDto } from './dto/add-coin.dto';
 
 import { Coin } from './coin.entity';
 import { ICoin, IResponseGetPortfolioStatus } from './coin.model';
@@ -25,8 +25,13 @@ export class CoinController {
     return this.coinsService.getPortfolioStatus();
   }
 
-  @Delete()
+  @Post('/delete')
   deleteCoin(@Body() id: Coin['id']): Promise<unknown> {
     return this.coinsService.deleteCoin(id);
+  }
+
+  @Post('/buy_more')
+  buyMoreCoins(@Body() coinDto: CoinDto): Promise<unknown> {
+    return this.coinsService.buyMoreCoins(coinDto);
   }
 }

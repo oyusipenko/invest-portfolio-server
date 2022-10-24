@@ -3,7 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Coin } from './coin.entity';
-import { AddCoinDto } from './dto/add-coin.dto';
+import { AddCoinDto, CoinDto } from './dto/add-coin.dto';
 import { CoinRepository } from './coin.repository';
 import {
   IAllCoinsStatus,
@@ -59,17 +59,17 @@ export class CoinService {
         const coinStatus = {
           quantity: +coin.quantity,
           coinName: coin.coinName,
-          priceStartAverage: +coin.priceAverage,
-          costStart: +coin.quantity * +coin.priceAverage,
+          priceStartAverage: +coin.price,
+          costStart: +coin.quantity * +coin.price,
           priceCurrent: +coinsCurrentPrice[coin.coinName],
           costCurrent: +coin.quantity * +coinsCurrentPrice[coin.coinName],
           profitDollar:
             +coin.quantity * +coinsCurrentPrice[coin.coinName] -
-            +coin.quantity * +coin.priceAverage,
+            +coin.quantity * +coin.price,
           profitPercent:
             ((+coin.quantity * +coinsCurrentPrice[coin.coinName] -
-              +coin.quantity * +coin.priceAverage) /
-              (+coin.quantity * +coin.priceAverage)) *
+              +coin.quantity * +coin.price) /
+              (+coin.quantity * +coin.price)) *
             100,
         };
         const test = [...acc, coinStatus];
@@ -96,5 +96,21 @@ export class CoinService {
       },
     };
     return portfolioStatus;
+  }
+
+  async buyMoreCoins(coinDto: CoinDto): Promise<void> {
+    const allUserCoins = await this.getAllUserCoins();
+    const selectedCoin = allUserCoins.find((coin) => coin.id === coinDto.id);
+
+    const updateCoinData = {
+      id: coinDto.id,
+      quantity: (+selectedCoin.quantity + +coinDto.quantity).toString(),
+      price: (
+        (+selectedCoin.price + +coinDto.price) /
+        (+selectedCoin.quantity + +coinDto.quantity)
+      ).toString(),
+    };
+
+    await this.coinRepository.updateCoin(updateCoinData);
   }
 }
