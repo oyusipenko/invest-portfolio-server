@@ -23,7 +23,7 @@ export interface IPerCoinStatus {
   profitPercent: number;
 }
 
-export interface IResponseGetPortfolioStatus {
-  perCoin: IPerCoinStatus[];
-  allCoins: IAllCoinsStatus;
+export interface IPortfolioStatus {
+  perCoin: IPerCoinStatus[] | null;
+  allCoins: IAllCoinsStatus | null;
 }

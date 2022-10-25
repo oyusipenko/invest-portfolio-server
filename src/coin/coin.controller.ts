@@ -4,7 +4,7 @@ import { CoinService } from './coin.service';
 import { AddCoinDto, CoinDto } from './dto/add-coin.dto';
 
 import { Coin } from './coin.entity';
-import { ICoin, IResponseGetPortfolioStatus } from './coin.model';
+import { ICoin, IPortfolioStatus } from './coin.model';
 
 @Controller('coins')
 export class CoinController {
@@ -21,7 +21,7 @@ export class CoinController {
   }
 
   @Get('/portfolio_status')
-  getPortfolioStatus(): Promise<IResponseGetPortfolioStatus> {
+  getPortfolioStatus(): Promise<IPortfolioStatus | null> {
     return this.coinsService.getPortfolioStatus();
   }
 

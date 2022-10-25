@@ -9,7 +9,7 @@ import {
   IAllCoinsStatus,
   ICoin,
   IPerCoinStatus,
-  IResponseGetPortfolioStatus,
+  IPortfolioStatus,
 } from './coin.model';
 
 @Injectable()
@@ -41,8 +41,17 @@ export class CoinService {
     return data;
   }
 
-  async getPortfolioStatus(): Promise<IResponseGetPortfolioStatus> {
+  async getPortfolioStatus(): Promise<IPortfolioStatus> {
+    let portfolioStatus: IPortfolioStatus = {
+      perCoin: null,
+      allCoins: null,
+    };
+
     const allUserCoins = await this.getAllUserCoins();
+
+    if (!allUserCoins.length) {
+      return portfolioStatus;
+    }
 
     const coinsCurrentPrice = await Promise.all(
       allUserCoins.map((coin) => this.getCoinPrice(coin.coinName)),
@@ -89,12 +98,13 @@ export class CoinService {
       { costStart: 0, costCurrent: 0, profitUsd: 0, profitPercentage: 0 },
     );
 
-    const portfolioStatus: IResponseGetPortfolioStatus = {
+    portfolioStatus = {
       perCoin: [...statusPerCoin],
       allCoins: {
         ...statusAllCoins,
       },
     };
+
     return portfolioStatus;
   }
 
