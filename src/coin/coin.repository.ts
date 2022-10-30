@@ -2,44 +2,46 @@ import { Repository } from 'typeorm';
 import { Coin } from './coin.entity';
 import { AddCoinDto } from './dto/add-coin.dto';
 import { ICoin } from './coin.model';
+import { User } from '../auth/user.entity';
 
 export interface CoinRepository extends Repository<Coin> {
   this: Repository<Coin>;
 
-  getAllUserCoins(): Promise<Coin[]>;
+  getAllUserCoins(arg0: User): Promise<Coin[]>;
 
-  addCoin: any;
-  deleteCoin: any;
-  updateCoin: any;
+  addCoin: (arg0: AddCoinDto, arg1: User) => Promise<Coin>;
+  deleteCoin: (arg0: Coin['id'], arg1: User) => Promise<void>;
+  updateCoin: (arg0: Partial<ICoin>) => Promise<void>;
 }
 
 export const customCoinRepositoryMethods: Pick<
   CoinRepository,
   'getAllUserCoins' | 'addCoin' | 'deleteCoin' | 'updateCoin'
 > = {
-  async getAllUserCoins(this: Repository<Coin>) {
-    const allUserCoins = await this.find();
-
+  async getAllUserCoins(user) {
+    const query = this.createQueryBuilder('coin');
+    query.where({ user });
+    const allUserCoins = query.getMany();
     return allUserCoins;
   },
-  async addCoin(this: Repository<Coin>, addCoinDto: AddCoinDto) {
-    const { coinName, quantity, price } = addCoinDto;
-
+  async addCoin(addCoinDto, user) {
+    const { coinName, quantity, priceAverage } = addCoinDto;
     const coin = await this.create({
       coinName: coinName.toUpperCase(),
       quantity,
-      price,
+      priceAverage,
+      user,
     });
 
     await this.save(coin);
     return coin;
   },
 
-  async deleteCoin(this: Repository<Coin>, id: string) {
-    await this.delete(id);
+  async deleteCoin(id: string, user) {
+    await this.delete(id, user);
   },
 
-  async updateCoin(this: Repository<Coin>, coin: Partial<ICoin>) {
+  async updateCoin(coin: Partial<ICoin>) {
     await this.createQueryBuilder()
       .update(coin)
       .set(coin)

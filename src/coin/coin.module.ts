@@ -10,9 +10,11 @@ import {
 import { customCoinRepositoryMethods } from './coin.repository';
 import { Coin } from './coin.entity';
 import { DataSource } from 'typeorm';
+import { AuthModule } from '../auth/auth.module';
+import { User } from '../auth/user.entity';
 
 @Module({
-  imports: [HttpModule, TypeOrmModule.forFeature([Coin])],
+  imports: [AuthModule, HttpModule, TypeOrmModule.forFeature([Coin, User])],
   controllers: [CoinController],
   providers: [
     {

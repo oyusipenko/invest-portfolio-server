@@ -2,7 +2,7 @@ export interface ICoin {
   id?: string;
   coinName: string;
   quantity: string;
-  price: string;
+  priceAverage: string;
 }
 
 export interface IAllCoinsStatus {

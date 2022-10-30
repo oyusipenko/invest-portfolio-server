@@ -11,6 +11,7 @@ import {
   IPerCoinStatus,
   IPortfolioStatus,
 } from './coin.model';
+import { User } from '../auth/user.entity';
 
 @Injectable()
 export class CoinService {
@@ -20,16 +21,16 @@ export class CoinService {
     private readonly httpService: HttpService,
   ) {}
 
-  async getAllUserCoins(): Promise<ICoin[]> {
-    return await this.coinRepository.getAllUserCoins();
+  async getAllUserCoins(user: User): Promise<Coin[]> {
+    return await this.coinRepository.getAllUserCoins(user);
   }
 
-  async addCoin(addCoinDto: AddCoinDto): Promise<Coin> {
-    return await this.coinRepository.addCoin(addCoinDto);
+  async addCoin(addCoinDto: AddCoinDto, user: User): Promise<Coin> {
+    return await this.coinRepository.addCoin(addCoinDto, user);
   }
 
-  async deleteCoin(id: Coin['id']): Promise<Coin> {
-    return await this.coinRepository.deleteCoin(id);
+  async deleteCoin(id: Coin['id'], user: User): Promise<void> {
+    return await this.coinRepository.deleteCoin(id, user);
   }
 
   async getCoinPrice(coinSymbol: string): Promise<any> {
@@ -41,13 +42,13 @@ export class CoinService {
     return data;
   }
 
-  async getPortfolioStatus(): Promise<IPortfolioStatus> {
+  async getPortfolioStatus(user: User): Promise<IPortfolioStatus> {
     let portfolioStatus: IPortfolioStatus = {
       perCoin: null,
       allCoins: null,
     };
 
-    const allUserCoins = await this.getAllUserCoins();
+    const allUserCoins = await this.getAllUserCoins(user);
 
     if (!allUserCoins.length) {
       return portfolioStatus;
@@ -68,17 +69,17 @@ export class CoinService {
         const coinStatus = {
           quantity: +coin.quantity,
           coinName: coin.coinName,
-          priceStartAverage: +coin.price,
-          costStart: +coin.quantity * +coin.price,
+          priceStartAverage: +coin.priceAverage,
+          costStart: +coin.quantity * +coin.priceAverage,
           priceCurrent: +coinsCurrentPrice[coin.coinName],
           costCurrent: +coin.quantity * +coinsCurrentPrice[coin.coinName],
           profitDollar:
             +coin.quantity * +coinsCurrentPrice[coin.coinName] -
-            +coin.quantity * +coin.price,
+            +coin.quantity * +coin.priceAverage,
           profitPercent:
             ((+coin.quantity * +coinsCurrentPrice[coin.coinName] -
-              +coin.quantity * +coin.price) /
-              (+coin.quantity * +coin.price)) *
+              +coin.quantity * +coin.priceAverage) /
+              (+coin.quantity * +coin.priceAverage)) *
             100,
         };
         const arr = [...acc, coinStatus];
@@ -108,15 +109,15 @@ export class CoinService {
     return portfolioStatus;
   }
 
-  async buyMoreCoins(coinDto: CoinDto): Promise<void> {
-    const allUserCoins = await this.getAllUserCoins();
+  async buyMoreCoins(coinDto: CoinDto, user: User): Promise<void> {
+    const allUserCoins = await this.getAllUserCoins(user);
     const selectedCoin = allUserCoins.find((coin) => coin.id === coinDto.id);
 
     const updatedCoinData = {
       id: coinDto.id,
       quantity: (+selectedCoin.quantity + +coinDto.quantity).toString(),
       price: (
-        (+selectedCoin.price + +coinDto.price) /
+        (+selectedCoin.priceAverage + +coinDto.priceAverage) /
         (+selectedCoin.quantity + +coinDto.quantity)
       ).toString(),
     };
@@ -124,8 +125,11 @@ export class CoinService {
     await this.coinRepository.updateCoin(updatedCoinData);
   }
 
-  async sellCoins(data: Pick<ICoin, 'id' | 'quantity'>): Promise<void> {
-    const allUserCoins = await this.getAllUserCoins();
+  async sellCoins(
+    data: Pick<ICoin, 'id' | 'quantity'>,
+    user: User,
+  ): Promise<void> {
+    const allUserCoins = await this.getAllUserCoins(user);
     const selectedCoin = allUserCoins.find((coin) => coin.id === data.id);
 
     const updatedCoinData = {

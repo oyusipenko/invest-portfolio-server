@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from '../auth/user.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Coin {
@@ -12,5 +14,9 @@ export class Coin {
   quantity: string;
 
   @Column()
-  price: string;
+  priceAverage: string;
+
+  @ManyToOne((_type) => User, (user) => user.coins, { eager: false })
+  @Exclude({ toPlainOnly: true })
+  user: User;
 }

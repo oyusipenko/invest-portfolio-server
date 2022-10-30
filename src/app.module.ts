@@ -4,10 +4,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './config.schema';
 
 import { CoinModule } from './coin/coin.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     CoinModule,
+    AuthModule,
     ConfigModule.forRoot({
       envFilePath: [`.env.${process.env.STAGE}`],
       validationSchema: configValidationSchema,
