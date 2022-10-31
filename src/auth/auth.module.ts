@@ -6,8 +6,8 @@ import {
   getRepositoryToken,
   TypeOrmModule,
 } from '@nestjs/typeorm';
-import { User } from './User.entity';
 import { DataSource } from 'typeorm';
+import { User } from './User.entity';
 import { customUserRepositoryMethods } from './users.repository';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
