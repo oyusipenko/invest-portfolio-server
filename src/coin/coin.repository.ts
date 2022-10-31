@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import { Coin } from './coin.entity';
 import { AddCoinDto } from './dto/add-coin.dto';
 import { ICoin } from './coin.model';
-import { User } from '../auth/user.entity';
+import { User } from '../auth/user1.entity';
 
 export interface CoinRepository extends Repository<Coin> {
   this: Repository<Coin>;

@@ -11,7 +11,7 @@ import {
   IPerCoinStatus,
   IPortfolioStatus,
 } from './coin.model';
-import { User } from '../auth/user.entity';
+import { User } from '../auth/user1.entity';
 
 @Injectable()
 export class CoinService {

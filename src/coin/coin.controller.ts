@@ -6,7 +6,7 @@ import { AddCoinDto, CoinDto } from './dto/add-coin.dto';
 import { Coin } from './coin.entity';
 import { ICoin, IPortfolioStatus } from './coin.model';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from '../auth/user.entity';
+import { User } from '../auth/user1.entity';
 import { GetUser } from '../auth/get-user.decorator';
 
 @Controller('coins')
