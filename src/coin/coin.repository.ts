@@ -26,6 +26,7 @@ export const customCoinRepositoryMethods: Pick<
   },
   async addCoin(addCoinDto, user) {
     const { coinName, quantity, priceAverage } = addCoinDto;
+
     const coin = await this.create({
       coinName: coinName.toUpperCase(),
       quantity,

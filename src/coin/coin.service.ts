@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -26,7 +26,19 @@ export class CoinService {
   }
 
   async addCoin(addCoinDto: AddCoinDto, user: User): Promise<Coin> {
-    return await this.coinRepository.addCoin(addCoinDto, user);
+    try {
+      await this.httpService
+        .get(
+          `https://www.binance.com/api/v3/ticker/price?symbol=${addCoinDto.coinName}BUSD`,
+        )
+        .toPromise();
+
+      return await this.coinRepository.addCoin(addCoinDto, user);
+    } catch (e) {
+      throw new NotFoundException(
+        `Coin "${addCoinDto.coinName}" doesn\'t exists in Binance market!`,
+      );
+    }
   }
 
   async deleteCoin(id: Coin['id'], user: User): Promise<void> {

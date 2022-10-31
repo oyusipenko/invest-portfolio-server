@@ -9,8 +9,7 @@ import * as bcrypt from 'bcrypt';
 
 export interface UsersRepository extends Repository<User> {
   this: Repository<User>;
-
-  createUser: any;
+  createUser: (authCredentialsDto: AuthCredentialsDto) => void;
 }
 
 export const customUserRepositoryMethods: Pick<UsersRepository, 'createUser'> =
