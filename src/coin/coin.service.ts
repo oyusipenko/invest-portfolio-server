@@ -129,8 +129,9 @@ export class CoinService {
       id: coinDto.id,
       quantity: (+selectedCoin.quantity + +coinDto.quantity).toString(),
       priceAverage: (
-        (+selectedCoin.priceAverage + +coinDto.priceAverage) /
-        (+selectedCoin.quantity + +coinDto.quantity)
+        (+coinDto.quantity * +coinDto.priceAverage +
+          +selectedCoin.quantity * +selectedCoin.priceAverage) /
+        (+coinDto.quantity + +selectedCoin.quantity)
       ).toString(),
     };
 
