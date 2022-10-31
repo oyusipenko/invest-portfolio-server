@@ -128,7 +128,7 @@ export class CoinService {
     const updatedCoinData = {
       id: coinDto.id,
       quantity: (+selectedCoin.quantity + +coinDto.quantity).toString(),
-      price: (
+      priceAverage: (
         (+selectedCoin.priceAverage + +coinDto.priceAverage) /
         (+selectedCoin.quantity + +coinDto.quantity)
       ).toString(),
