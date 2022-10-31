@@ -7,7 +7,7 @@ import {
   TypeOrmModule,
 } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { User } from './User1.entity';
+import { User } from './user.entity';
 import { customUserRepositoryMethods } from './users.repository';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
